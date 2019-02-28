@@ -4,8 +4,12 @@ images = []
 for line in open('a_example.txt', 'r'):
     print line
     if count > -1:
-        line.split(' ')
-        images.append(line)
+        pieces = line.split(' ')
+        image = []
+        image.append(pieces[0])
+        image.append(pieces[1])
+        image.append(pieces[2:])
+        images.append(image)
     count = count + 1
 
 # build slideshow
