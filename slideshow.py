@@ -1,7 +1,7 @@
-from random import shuffle
+from random import shuffle, randint, sample
 
 files = ['a_example', 'b_lovely_landscapes', 'c_memorable_moments', 'd_pet_pictures', 'e_shiny_selfies']
-bests = [2, 39, 167, 174853, 112853]
+bests = [2, 39, 1463, 174853, 112853]
 
 
 def read_images(filename):
@@ -54,6 +54,15 @@ def get_vertical_tags(row, images):
     return tags1 + list(nondupes)
 
 
+def get_slide_tags(slide, images):
+    tags = []
+    if type(slide) is str:
+        tags = get_vertical_tags(slide, images)
+    else:
+        tags = images[slide][3]
+    return tags
+
+
 def score_slideshow(slideshow, images):
     """
     For two subsequent slides Si and Si+1, the interest factor is the minimum (the
@@ -65,21 +74,9 @@ def score_slideshow(slideshow, images):
     score = 0
     for i in range(0, len(slideshow) - 1):
         row1 = slideshow[i]
-        s1_tags = []
-        if type(row1) is str:
-            s1_tags = get_vertical_tags(row1, images)
-        else:
-            s1_tags = images[row1][3]
-        # print 's1_tags'
-        # print s1_tags
+        s1_tags = get_slide_tags(row1, images)
         row2 = slideshow[i + 1]
-        s2_tags = []
-        if type(row2) is str:
-            s2_tags = get_vertical_tags(row2, images)
-        else:
-            s2_tags = images[row2][3]
-        # print 's2_tags'
-        # print s2_tags
+        s2_tags = get_slide_tags(row2, images)
         score = score + score_pair(s1_tags, s2_tags)
         # print 'score {}'.format(score)
     return score
@@ -115,12 +112,47 @@ def create_slideshow(images):
                 slideshow.append(vertical_pair + ' ' + str(image[0]))
                 vertical_pair = ''
             # print 'vertical_pair: {}'.format(vertical_pair)
-    print 'horizontal + vertical pairs'
+    # print 'horizontal + vertical pairs'
     # print slideshow
     # score = score_slideshow(slideshow, images)
     # print 'score {}'.format(score)
 
     return slideshow
+
+
+def optimize_slideshow(slideshow, images):
+    " takes a slideshow and optimizes pairs"
+
+    # put slide in new slideshow & remove it
+    index = randint(0, len(slideshow) - 1)
+    new_slideshow = [slideshow[index]]
+    slideshow.pop(index)
+
+    # find the next best slide & remove from random subset of possibles
+    for i in range(0, len(slideshow)):
+        best_score = 0
+        slide1 = new_slideshow[i]
+        index_to_remove = 0
+
+        # a more useful version of the slideshow array
+        eslideshow = []
+        for k, kslide in enumerate(slideshow):
+            eslideshow.append([k, kslide])
+        slide_subset = sample(eslideshow, min(10, len(slideshow) - 1))
+        for j, slide2 in slide_subset:
+            tags1 = get_slide_tags(slide1, images)
+            tags2 = get_slide_tags(slide2, images)
+            score = score_pair(tags1, tags2)
+            if score > best_score:
+                best_score = score
+                index_to_remove = j
+        # print 'length {}'.format(len(slideshow))
+        # print 'index_to_remove {}'.format(index_to_remove)
+        if len(slideshow) > 0:
+            new_slideshow.append(slideshow[index_to_remove])
+            slideshow.pop(index_to_remove)
+    # print slideshow
+    return new_slideshow
 
 
 def create_output(filename):
@@ -137,28 +169,26 @@ def create_output(filename):
             best = bests[i]
     print 'best so far for {}: {}'.format(filename, best)
 
-    for i in range(0, 1):
-        # random shuffle
-        shuffle(slideshow)
-        score = score_slideshow(slideshow, images)
-        # print 'score {}'.format(score)
-        if score > best:
-            # output file
-            f = open(filename + ".out", "w")
-            f.write(str(len(slideshow)) + '\n')
-            for slide in slideshow:
-                f.write(str(slide) + '\n')
+    slideshow = optimize_slideshow(slideshow, images)
+    # print slideshow
+    score = score_slideshow(slideshow, images)
+    print 'score {}'.format(score)
+    if score > best:
+        # output file
+        f = open(filename + ".out", "w")
+        f.write(str(len(slideshow)) + '\n')
+        for slide in slideshow:
+            f.write(str(slide) + '\n')
 
-            best = score
-            print 'new best: {}'.format(best)
-
-    return best
+        best = score
+        print 'new best: {}'.format(best)
+    return score
 
 
 total_score = 0
 total_score = total_score + create_output('a_example')
-total_score = total_score + create_output('b_lovely_landscapes')
-total_score = total_score + create_output('c_memorable_moments')
+# total_score = total_score + create_output('b_lovely_landscapes')
+# total_score = total_score + create_output('c_memorable_moments')
 total_score = total_score + create_output('d_pet_pictures')
-total_score = total_score + create_output('e_shiny_selfies')
+# total_score = total_score + create_output('e_shiny_selfies')
 print 'total_score: {}'.format(total_score)
