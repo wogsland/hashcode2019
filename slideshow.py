@@ -1,3 +1,9 @@
+from random import shuffle
+
+files = ['a_example', 'b_lovely_landscapes', 'c_memorable_moments', 'd_pet_pictures', 'e_shiny_selfies']
+bests = [1, 12, 141, 172689, 112468]
+
+
 def score_pair(s1_tags, s2_tags):
     common_tags = 0
     not_in_s1_tags = 0
@@ -61,7 +67,7 @@ def score_slideshow(slideshow, images):
     return score
 
 
-def create_output(filename):
+def create_slideshow(filename):
     # read in file
     count = -1
     images = []
@@ -108,14 +114,37 @@ def create_output(filename):
             # print 'vertical_pair: {}'.format(vertical_pair)
     print 'horizontal + vertical pairs'
     # print slideshow
-    score = score_slideshow(slideshow, images)
-    print 'score {}'.format(score)
+    # score = score_slideshow(slideshow, images)
+    # print 'score {}'.format(score)
 
-    # output file
-    f = open(filename + ".out", "w")
-    f.write(str(len(slideshow)) + '\n')
-    for slide in slideshow:
-        f.write(str(slide) + '\n')
+    return [slideshow, images]
+
+
+def create_output(filename):
+    created = create_slideshow(filename)
+    slideshow = created[0]
+    images = created[1]
+    score = score_slideshow(slideshow, images)
+
+    best = 0
+    for i, name in enumerate(files):
+        if name == filename:
+            best = bests[i]
+    print 'best so far for {}: {}'.format(filename, best)
+
+    """
+    for i in range(0, 10):
+        # random shuffle
+        shuffle(slideshow)
+        score = score_slideshow(slideshow, images)
+        print 'score {}'.format(score)
+    """
+    if score > best:
+        # output file
+        f = open(filename + ".out", "w")
+        f.write(str(len(slideshow)) + '\n')
+        for slide in slideshow:
+            f.write(str(slide) + '\n')
 
     return score
 

@@ -1,3 +1,16 @@
 list of photos + tags
 
-slide rows single horzontal or two vertical
+slide rows single horizontal or two vertical
+
+naive order:
+horizontal + vertical pairs
+score 1
+horizontal + vertical pairs
+score 12
+horizontal + vertical pairs
+score 141
+horizontal + vertical pairs
+score 172689
+horizontal + vertical pairs
+score 112468
+total_score: 285311
