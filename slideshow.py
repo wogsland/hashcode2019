@@ -1,7 +1,25 @@
 from random import shuffle
 
 files = ['a_example', 'b_lovely_landscapes', 'c_memorable_moments', 'd_pet_pictures', 'e_shiny_selfies']
-bests = [1, 12, 141, 172689, 112468]
+bests = [2, 39, 167, 174853, 112853]
+
+
+def read_images(filename):
+    # read in file
+    count = -1
+    images = []
+    for line in open(filename + '.txt', 'r'):
+        # print line
+        if count > -1:
+            trunk = line.split('\n')
+            pieces = trunk[0].split(' ')
+            image = [count]
+            image.append(pieces[0])
+            image.append(pieces[1])
+            image.append(pieces[2:])
+            images.append(image)
+        count = count + 1
+    return images
 
 
 def score_pair(s1_tags, s2_tags):
@@ -67,23 +85,8 @@ def score_slideshow(slideshow, images):
     return score
 
 
-def create_slideshow(filename):
-    # read in file
-    count = -1
-    images = []
-    for line in open(filename + '.txt', 'r'):
-        # print line
-        if count > -1:
-            trunk = line.split('\n')
-            pieces = trunk[0].split(' ')
-            image = [count]
-            image.append(pieces[0])
-            image.append(pieces[1])
-            image.append(pieces[2:])
-            images.append(image)
-        count = count + 1
-
-    # build + score slideshows
+def create_slideshow(images):
+    " builds slideshow "
 
     # only horizontal
     """
@@ -117,14 +120,16 @@ def create_slideshow(filename):
     # score = score_slideshow(slideshow, images)
     # print 'score {}'.format(score)
 
-    return [slideshow, images]
+    return slideshow
 
 
 def create_output(filename):
-    created = create_slideshow(filename)
-    slideshow = created[0]
-    images = created[1]
-    score = score_slideshow(slideshow, images)
+    # read in file
+    images = read_images(filename)
+
+    # create slideshow
+    slideshow = create_slideshow(images)
+    # score = score_slideshow(slideshow, images)
 
     best = 0
     for i, name in enumerate(files):
@@ -132,19 +137,20 @@ def create_output(filename):
             best = bests[i]
     print 'best so far for {}: {}'.format(filename, best)
 
-    """
-    for i in range(0, 10):
+    for i in range(0, 1):
         # random shuffle
         shuffle(slideshow)
         score = score_slideshow(slideshow, images)
-        print 'score {}'.format(score)
-    """
-    if score > best:
-        # output file
-        f = open(filename + ".out", "w")
-        f.write(str(len(slideshow)) + '\n')
-        for slide in slideshow:
-            f.write(str(slide) + '\n')
+        # print 'score {}'.format(score)
+        if score > best:
+            # output file
+            f = open(filename + ".out", "w")
+            f.write(str(len(slideshow)) + '\n')
+            for slide in slideshow:
+                f.write(str(slide) + '\n')
+
+            best = score
+            print 'new best: {}'.format(best)
 
     return score
 
