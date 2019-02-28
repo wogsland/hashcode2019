@@ -152,7 +152,7 @@ def create_output(filename):
             best = score
             print 'new best: {}'.format(best)
 
-    return score
+    return best
 
 
 total_score = 0
